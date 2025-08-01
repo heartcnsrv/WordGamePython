@@ -1,0 +1,17 @@
+# Ignore virtual environments
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Ignore OS junk
+.DS_Store
+Thumbs.db
+
+# Ignore build folders
+build/
+dist/
+*.egg-info/
