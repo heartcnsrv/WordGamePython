@@ -1,0 +1,71 @@
+module service {
+
+  exception AlreadyExists     { string reason; };
+  exception NotFound          { string reason; };
+  exception InvalidCredentials{ string reason; };
+  exception AlreadyLoggedIn   { string reason; };
+
+  struct PlayerAccount {
+      long   playerId;
+      string username;
+      string password;
+      short  wins;
+      boolean isLoggedIn;
+  };
+  typedef sequence<PlayerAccount> PlayerList;
+
+
+  struct GameConfiguration {
+      short waitTimeInSeconds;
+      short roundTimeInSeconds;
+  };
+
+    // Admin
+  interface AdminService {
+      void createPlayer(in string username,
+                               in string password)
+          raises (AlreadyExists);
+      void removePlayer(in string username)
+          raises (NotFound);
+      void updatePlayer(in string oldUsername,
+                                   in string newUsername,
+                                   in string newPassword)
+          raises (NotFound, AlreadyExists);
+      PlayerList searchPlayer(in string keyword);
+
+
+      void updateWaitTime(in short seconds);
+      void updateRoundTime(in short seconds);
+      short getWaitTime();
+      short getRoundTime();
+  };
+
+  // Leaderboard
+  interface LeaderboardService {
+      typedef sequence<PlayerAccount> PlayerScores;
+      PlayerScores getTopPlayers();
+      void incrementWins(in string username);
+  };
+
+  // Login / Logout
+  struct LoginResult {
+      boolean success;
+      boolean wasForcedLogout;
+      string  sessionId;
+  };
+
+  interface LoginService {
+      LoginResult loginPlayer(in string username,
+                              in string password)
+          raises (InvalidCredentials, AlreadyLoggedIn);
+      LoginResult loginAdmin(in string username,
+                             in string password)
+          raises (InvalidCredentials, AlreadyLoggedIn);
+      LoginResult forceLoginPlayer(in string username,
+                                   in string password,
+                                   in string table) // for when a user is already logged in in another computer
+          raises (InvalidCredentials);
+      void logoutPlayer(in string sessionId);
+  };
+
+};

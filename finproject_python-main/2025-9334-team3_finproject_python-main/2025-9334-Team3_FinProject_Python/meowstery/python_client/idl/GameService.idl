@@ -1,0 +1,51 @@
+module service {
+
+  //── Game Session & Matchmaking
+  struct GameSession {
+      string           gameId;
+      string           startTime;
+      sequence<string> playerUsernames;
+      string           sessionStatus;
+  };
+  typedef sequence<GameSession> GameSessionList;
+
+  exception NoOpponentFound     { string reason; };
+  exception GameNotFound        { string reason; };
+  exception InvalidGuess        { string reason; };
+
+  interface GameManagerService {
+      string         joinOrCreateGameSession(in string username);
+      GameSessionList listActiveGameSessions();
+  };
+
+  //── In-Game Guessing
+  struct WordMaskInfo {
+        string maskedWord;
+        short  guessesLeft;
+    };
+
+  interface GameService {
+      void          requestToJoinGame(in string username)
+          raises (NoOpponentFound);
+      WordMaskInfo  getWordMask(in string username)
+          raises (GameNotFound);
+      void          submitGuess(in string username,
+                                      in char   guessedLetter)
+          raises (InvalidGuess, GameNotFound);
+      short         getRemainingGuesses(in string username)
+          raises (GameNotFound);
+      string        getGameStatus(in string username)
+          raises (GameNotFound);
+      string        getRoundStartTime(in string gameSessionId, in long roundNumber);
+      short         getRoundDuration(in string gameSessionId);
+  };
+
+  //── Word Management
+  interface WordService {
+      string getRandomWord(in string gameId);
+      void   markWordAsUsed(in string word,
+                            in string gameId);
+      string getNewWordForNextRound(in string gameId);
+  };
+
+};
